@@ -12,22 +12,31 @@ server.use(cors());
 // Declare a port
 const PORT = process.env.PORT || 2000;
 
+//API key for locations
+const Location_API_KEY = process.env.Location_API_KEY;
+
+//API key for weather
+const Weather_API_KEY = process.env.Weather_API_KEY;
+
+//API key for hiking
+const Trial_API_KEY = process.env.Trial_API_KEY;
+
 server.listen(PORT, () => {
     console.log('I am listening to port: ', PORT);
 });
 
 // localhost:2000/location
-server.get('/location', (request, response) => {
+server.get('/location', async(request, response) => {
     let city = request.query.city;
     let status = 200;
-    response.status(status).send(getLocation(city));
+    response.status(status).send(await getLocation(city));
 });
 
 
 // localhost:2000/weather
-server.get('/weather', (request, response) => {
+server.get('/weather', async(request, response) => {
     let status = 200;
-    response.status(status).send(getWeather());
+    response.status(status).send(await getWeather());
 });
 
 // 404 error
