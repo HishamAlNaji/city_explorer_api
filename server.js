@@ -10,7 +10,7 @@ const server = express();
 server.use(cors());
 
 // Declare a port
-const PORT = process.env.PORT || 2500;
+const PORT = process.env.PORT || 2000;
 
 server.listen(PORT, () => {
     console.log('I am listening to port: ', PORT);
