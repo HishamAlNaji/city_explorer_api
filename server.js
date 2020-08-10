@@ -1,17 +1,20 @@
 'use strict';
 
 // variables :
+require('dotenv').config();
 const express = require('express');
 var cors = require('cors');
-require('dotenv').config();
 const pg = require("pg");
 
 // init the server :
 const server = express();
 server.use(cors());
 
+// console.log(process.env.DATABASE_URL)
+
 //create connection to database
-var dataBase = new pg.Client(process.env.DATABASE_URL);
+var db = new pg.Client(process.env.DATABASE_URL);
+// console.log(db)
 
 // Use super agent
 const superagent = require("superagent");
@@ -28,8 +31,12 @@ const WEATHER_API_KEY = process.env.WEATHER_API_KEY;
 //API key for hiking
 const TRAIL_API_KEY = process.env.TRAIL_API_KEY;
 
+const MOVIE_API_KEY = process.env.MOVIE_API_KEY;
 
-dataBase.connect().then(() => {
+const YELP_API_KEY = process.env.YELP_API_KEY;
+
+
+db.connect().then(() => {
     server.listen(PORT, () => {
         console.log('I am listening to port: ', PORT);
     });
@@ -41,6 +48,10 @@ dataBase.connect().then(() => {
 server.get('/location', async(request, response) => {
     let city = request.query.city;
     let status = 200;
+    // getLocation(city).then(res => {
+    //     response.send(res);
+    // })
+
     let dataRetrived = await getLocationDB(city);
     if (dataRetrived.length === 0) {
         await getLocation(city).then((data) => {
@@ -56,7 +67,7 @@ server.get('/location', async(request, response) => {
 
 
 // localhost:2000/weather
-server.get('/  weather', async(request, response) => {
+server.get('/weather', async(request, response) => {
     let lat = request.query.latitude;
     let lon = request.query.longitude;
     let status = 200;
@@ -66,7 +77,7 @@ server.get('/  weather', async(request, response) => {
 // localhost:3010/trails
 server.get("/trails", async(request, response) => {
     let lat = request.query.latitude;
-    let lon = request.query.logitude;
+    let lon = request.query.longitude;
     let status = 200;
     response.status(status).send(await getTrails(lat, lon));
 });
@@ -98,7 +109,6 @@ server.all('*', (request, response) => {
     let status = 500;
     response.status(status).send('Internal server error');
 });
-
 // function to get location data
 function getLocation(city) {
     let url = "https://api.locationiq.com/v1/autocomplete.php";
@@ -110,7 +120,11 @@ function getLocation(city) {
         .get(url)
         .query(queryParams)
         .then((res) => {
+            // console.log(res);
             return new Location(city, res.body);
+            // return res.body;
+        }).catch(e => {
+            console.log(e);
         });
     return data;
 }
@@ -147,7 +161,7 @@ function saveLocationToDB(data) {
 
 
 // function to get weather data
-function getWeather(city) {
+function getWeather(lat, lon) {
     let url = "https://api.weatherbit.io/v2.0/forecast/daily";
     let queryParams = {
         key: WEATHER_API_KEY,
@@ -183,7 +197,7 @@ function getTrails(lat, lon) {
             });
         })
         .catch((error) => {
-            console.log(error);
+            // console.log(error);
         });
     return data;
 }
